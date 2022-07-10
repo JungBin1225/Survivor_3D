@@ -29,4 +29,4 @@
     + #### 화면 좌측에 있는 조이스틱으로 시야 각도를 회전할 수 있고, 화면 우측의 버튼으로 앞뒤로 캐릭터를 조작할 수 있다. 플레이어는 맵 곳곳에 존재하는 스킬을 얻어 몰려오는 적들을 공격할 수 있다. 스킬은 별도의 조작 없이 주변의 적들을 자동으로 공격한다. 몰려오는 적들을 스킬로 쓰러트리면서 출구를 찾아 나아가는 것이 목표이다.
   + ### 시연 영상
     + #### [유튜브 링크](https://youtu.be/W-j_b5MACjE)
-    + #### [![Video Label](https://user-images.githubusercontent.com/69952837/178147577-0ba07b58-8d36-4bb7-b306-3291cb117f06.PNG)](https://youtu.be/W-j_b5MACjE)
+    + #### [![Video Label](https://user-images.githubusercontent.com/69952837/178149211-b1f33793-014f-4a14-a447-d96a16a22290.PNG)](https://youtu.be/W-j_b5MACjE)
