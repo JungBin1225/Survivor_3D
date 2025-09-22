@@ -6,6 +6,9 @@ using UnityEngine.UI;
 public class SkillList : MonoBehaviour
 {
     private PlayerController player;
+    private skillExplain skillexplain_1;
+    private skillExplain skillexplain_2;
+    private skillExplain skillexplain_3;
 
     public List<Sprite> imageList;
 
@@ -20,6 +23,8 @@ public class SkillList : MonoBehaviour
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+        
+
 
         skillList_1 = new Dictionary<string, Sprite>();
         skillList_1.Add("Ball", imageList[0]);
@@ -70,41 +75,51 @@ public class SkillList : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        for(int i = 0; i < 3; i++)
+        SkillUpdate(3, skillIcon);
+    }
+
+    public void SkillUpdate(int index, List<Image> iconList)
+    {
+        if(player == null)
         {
-            if(player.ownSkill.Count >= i + 1)
+            player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+        }
+        for (int i = 0; i < index; i++)
+        {
+            if (player.ownSkill.Count >= i + 1)
             {
-                switch(player.GetSkillLV(player.ownSkill[i]))
-                {
-                    case 1:
-                        skillIcon[i].sprite = skillList_1[player.ownSkill[i]];
-                        break;
-
-                    case 2:
-                        skillIcon[i].sprite = skillList_2[player.ownSkill[i]];
-                        break;
-
-                    case 3:
-                        skillIcon[i].sprite = skillList_3[player.ownSkill[i]];
-                        break;
-
-                    case 4:
-                        skillIcon[i].sprite = skillList_4[player.ownSkill[i]];
-                        break;
-
-                    case 5:
-                        skillIcon[i].sprite = skillList_5[player.ownSkill[i]];
-                        break;
-                }
-                skillIcon[i].color = new Color(1, 1, 1, 1);
+                iconList[i].sprite = GetSprite(player.ownSkill[i]);
+                iconList[i].color = new Color(1, 1, 1, 1);
             }
             else
             {
-                skillIcon[i].sprite = null;
-                skillIcon[i].color = new Color(1, 1, 1, 0);
-
+                iconList[i].sprite = null;
+                iconList[i].color = new Color(1, 1, 1, 0);
             }
         }
+    }
+
+    public Sprite GetSprite(string skill)
+    {
+        switch (player.GetSkillLV(skill))
+        {
+
+            case 1:
+                return skillList_1[skill];
+
+            case 2:
+                return skillList_2[skill];
+
+            case 3:
+                return skillList_3[skill];
+
+            case 4:
+                return skillList_4[skill];
+
+            case 5:
+                return skillList_5[skill];
+        }
+        return null;
     }
 
     public void BGAni(int index)

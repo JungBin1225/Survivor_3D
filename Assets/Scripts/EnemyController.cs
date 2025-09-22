@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class EnemyController : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class EnemyController : MonoBehaviour
     public Transform front;
     public float atkSpeed;
     public bool isDelay;
+    public string type;
 
     private bool isGround;
     private bool isStiff;
@@ -44,6 +46,15 @@ public class EnemyController : MonoBehaviour
         Hp = 100;
 
         atkCooltime = 0;
+
+        if(attackRange > 3)
+        {
+            type = "Range";
+        }
+        else
+        {
+            type = "Close";
+        }
     }
 
     // Update is called once per frame
@@ -58,7 +69,6 @@ public class EnemyController : MonoBehaviour
         else
         {
             target = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
-
         }
 
         if (isPosion)
@@ -66,7 +76,11 @@ public class EnemyController : MonoBehaviour
             Hp -= 20 * Time.deltaTime;
         }
 
-        if(Hp > 0)
+        if(GameManager.gameManager.isCutScene)
+        {
+
+        }
+        else if(Hp > 0)
         {
             if(isStiff)
             {
@@ -101,7 +115,7 @@ public class EnemyController : MonoBehaviour
                 {
                     ani.SetBool("move", false);
 
-                    if (attackRange > 3)  //���Ÿ�
+                    if (type == "Range")
                     {
                         atkCooltime -= Time.deltaTime;
                         if (atkCooltime < 0)
@@ -121,7 +135,7 @@ public class EnemyController : MonoBehaviour
 
 
                     }
-                    else  //�ٰŸ�
+                    else
                     {
                         atkCooltime -= Time.deltaTime;
 
@@ -159,6 +173,10 @@ public class EnemyController : MonoBehaviour
             if (ani.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
             {
                 PlayerController.SetExp(enemytExp);  //do once
+                if(!SceneManager.GetActiveScene().name.Contains("Tutorial"))
+                {
+                    FindObjectOfType<SceneManagerMain>().spawnCount--;
+                }
                 Destroy(this.gameObject);
             }
             
@@ -192,13 +210,30 @@ public class EnemyController : MonoBehaviour
 
     public IEnumerator Stiff(float time)
     {
+        bool stiffAble = true;
         isStiff = true;
-        ani.SetTrigger("hit");
-        audio.Play();
-        while (time > 0)
+
+        if(type == "Close")
         {
-            time -= Time.deltaTime;
-            yield return null;
+            if(Random.Range(0, 2) == 0)
+            {
+                stiffAble = true;
+            }
+            else
+            {
+                stiffAble = false;
+            }
+        }
+
+        if(stiffAble)
+        {
+            ani.SetTrigger("hit");
+            audio.Play();
+            while (time > 0)
+            {
+                time -= Time.deltaTime;
+                yield return null;
+            }
         }
 
         isStiff = false;

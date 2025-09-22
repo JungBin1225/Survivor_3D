@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MoveBackBtn : MonoBehaviour
 {
@@ -11,12 +12,18 @@ public class MoveBackBtn : MonoBehaviour
     
     bool btDown = false;
 
+    tutorial_1Manager tutoManager;
 
     // Start is called before the first frame update
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
         player_view = GameObject.FindGameObjectWithTag("Player_view").GetComponent<Transform>();
+        if (SceneManager.GetActiveScene().name == "Tutorial_1")
+        {
+            tutoManager = GameObject.Find("TutorialManager").GetComponent<tutorial_1Manager>();
+        }
+        //tutoManager = GameObject.Find("TutorialManager").GetComponent<tutorial_1Manager>();
     }
 
     // Update is called once per frame
@@ -27,6 +34,11 @@ public class MoveBackBtn : MonoBehaviour
         {
             player.transform.Translate(0, 0, Time.deltaTime * -player.speed);
         }*/
+
+        if(GameManager.gameManager.isCutScene && btDown)
+        {
+            BtnUp();
+        }
     }
 
     /*public void MoveForward()
@@ -40,14 +52,24 @@ public class MoveBackBtn : MonoBehaviour
         btDown = false;
         player.isIdle = true;
         player.ChangeDir(0);
+
+        if (tutoManager != null)
+        {
+            tutoManager.clickCount++;
+            if (tutoManager.clickCount == 2)
+            {
+                tutoManager.flow_4();
+            }
+        }
     }
     public void BtnDown()
     {
-       
-        
-        btDown = true;
-        player_view.transform.rotation = Quaternion.Euler(0, player.transform.localEulerAngles.y + 180, 0);
-        player.isIdle = false;
-        player.ChangeDir(-1);
+        if (!GameManager.gameManager.isCutScene && Time.timeScale == 1)
+        {
+            btDown = true;
+            player_view.transform.rotation = Quaternion.Euler(0, player.transform.localEulerAngles.y + 180, 0);
+            player.isIdle = false;
+            player.ChangeDir(-1);
+        }
     }
 }

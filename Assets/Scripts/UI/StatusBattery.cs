@@ -24,7 +24,6 @@ public class StatusBattery : MonoBehaviour
     void Update()
     {
         CheckPlayerStatus();
-        
     }
 
     public void CheckPlayerStatus()
@@ -88,19 +87,19 @@ public class StatusBattery : MonoBehaviour
         }
         else if(statusType=="Hp")
         {
-            if (player.hp >= lv2Value)
+            if (player.GetHp() >= lv2Value)
             {
                 battery_sp[0].SetActive(true);
             }
-            else if (player.hp >= lv3Value)
+            else if (player.GetHp() >= lv3Value)
             {
                 battery_sp[1].SetActive(true);
             }
-            else if (player.hp >= lv4Value)
+            else if (player.GetHp() >= lv4Value)
             {
                 battery_sp[2].SetActive(true);
             }
-            else if (player.hp >= lv5Value)
+            else if (player.GetHp() >= lv5Value)
             {
                 battery_sp[3].SetActive(true);
             }

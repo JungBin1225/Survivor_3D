@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,7 +10,9 @@ public class PlayerController : MonoBehaviour
     public string charName;
     public float speed;
     public float rotSpeed;
-    public float hp;
+    public float rotValue;
+    public float maxHp;
+    private float hp;
     public float code;
     private int dir;
 
@@ -30,13 +33,16 @@ public class PlayerController : MonoBehaviour
     public int exp=0;
     public List<int> expList;
     public GameObject effectLvUp;
-
+    public GameObject gameoverButton;
 
     public int ballLV;
     public int knockbackLV;
     public int tauntLV;
     public int nautilusLV;
     public int virusLV;
+
+    public List<int> maxLV;
+
     //UI관련
     UIController ui;
     StatusBattery statusBt;
@@ -48,33 +54,48 @@ public class PlayerController : MonoBehaviour
     public Animation anim;
     public bool isIdle;
 
-
     //sound
     AudioSource audio;
     public AudioClip hitsound;
 
+    public bool isClear;
+
     void Start()
     {
+        hp = maxHp;
         ballLV = 0;
         knockbackLV = 0;
         tauntLV = 0;
         nautilusLV = 0;
         virusLV = 0;
 
+        isClear = false;
+
+        for(int i = 0; i < 5; i++)
+        {
+            maxLV.Add(0);
+        }
+
         rigidbody = GetComponent<Rigidbody>();
         ui = GameObject.FindGameObjectWithTag("UIController").GetComponent<UIController>();
         collider = GetComponent<CharacterController>();
         audio = this.GetComponent<AudioSource>();
         skillIcon = FindObjectOfType<SkillList>();
+        
 
-        InitSkill(charName);
+        InitPlayer();
     }
 
     void Update()
     {
         CheckHP();
+        
 
-        if(!test)
+        if(GameManager.gameManager.isCutScene)
+        {
+            collider.SimpleMove(Vector3.zero);
+        }
+        else if(!test)
         {
             CharacterMove();
         }
@@ -84,31 +105,31 @@ public class PlayerController : MonoBehaviour
 
             if (Input.GetKey(KeyCode.D))
             {
-                //transform.Translate(Time.deltaTime * speed, 0, 0);
-                direc = transform.right;
+                transform.Translate(Time.deltaTime * speed, 0, 0);
+                //direc = transform.right;
 
             }
             else if (Input.GetKey(KeyCode.A))
             {
-                //transform.Translate(-Time.deltaTime * speed, 0, 0);
-                direc = -transform.right;
+                transform.Translate(-Time.deltaTime * speed, 0, 0);
+                //direc = -transform.right;
             }
             else if (Input.GetKey(KeyCode.W))
             {
-                //transform.Translate(0, 0, Time.deltaTime * speed);
-                direc = transform.forward;
+                transform.Translate(0, 0, Time.deltaTime * speed);
+                //direc = transform.forward;
             }
             else if (Input.GetKey(KeyCode.S))
             {
-                //transform.Translate(0, 0, -Time.deltaTime * speed);
-                direc = -transform.forward;
+                transform.Translate(0, 0, -Time.deltaTime * speed);
+                //direc = -transform.forward;
             }
             else
             {
                 direc = Vector3.zero;
             }
 
-            collider.SimpleMove(direc * speed);
+            //collider.SimpleMove(direc * speed);
         }
 
         //Animations
@@ -122,7 +143,10 @@ public class PlayerController : MonoBehaviour
         }
 
         //Status
-        
+        if(!SceneManager.GetActiveScene().name.Contains("Tutorial") && !GameManager.gameManager.isCutScene)
+        {
+            UpdatePlayerInfo();
+        }
     }
 
     private void CharacterMove()
@@ -143,10 +167,17 @@ public class PlayerController : MonoBehaviour
 
     public void GetDamage(float atk)
     {
-        audio.clip = hitsound;
-        audio.Play();
-        hp = hp - atk;
-        ui.PlayerHpBar();
+        if(!isClear)
+        {
+            audio.clip = hitsound;
+            audio.Play();
+            hp = hp - atk;
+            if (hp < 0)
+            {
+                hp = 0;
+            }
+            ui.PlayerHpBar();
+        }
     }
     public void CheckHP()
     {
@@ -154,7 +185,18 @@ public class PlayerController : MonoBehaviour
         {
             //gameObject.SetActive(false);
             playerCharacter.SetActive(false);
+            StartCoroutine(GameOver());
         }
+    }
+
+    IEnumerator GameOver()
+    {
+        GameManager.gameManager.isCutScene = true;
+        GameManager.gameManager.initManager();
+
+        yield return new WaitForSeconds(3f);
+
+        gameoverButton.SetActive(true);
     }
 
     public void SetExp(int expAmount)
@@ -191,15 +233,18 @@ public class PlayerController : MonoBehaviour
 
     private void InitSkill(string name)
     {
-        switch(name)
+        if(!SceneManager.GetActiveScene().name.Contains("Tutorial"))
         {
-            case "Fire":
-                GetSkill("Ball");
-                break;
+            switch (name)
+            {
+                case "Fire":
+                    GetSkill("Ball", true);
+                    break;
 
-            case "Earth":
-                GetSkill("KnockBack");
-                break;
+                case "Earth":
+                    GetSkill("KnockBack", true);
+                    break;
+            }
         }
     }
 
@@ -239,7 +284,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void GetSkill(string type)
+    public void GetSkill(string type, bool init)
     {
         if (!ownSkill.Contains(type) && ownSkill.Count == 3)
         {
@@ -260,6 +305,11 @@ public class PlayerController : MonoBehaviour
                 {
                     skill_Ball.GetComponent<BallController>().UpdateLV(ballLV);
                 }
+
+                if(ballLV > maxLV[0])
+                {
+                    maxLV[0] = ballLV;
+                }
                 break;
 
             case "KnockBack":
@@ -274,19 +324,10 @@ public class PlayerController : MonoBehaviour
                 {
                     skill_KnockBack.GetComponent<KnockBack>().UpdateLV(knockbackLV);
                 }
-                break;
 
-            case "Taunt":
-                tauntLV++;
-                if (tauntLV == 1)
+                if (knockbackLV > maxLV[1])
                 {
-                    ownSkill.Add(type);
-                    skill_Taunt.SetActive(true);
-                    skill_Taunt.GetComponent<Taunt>().UpdateLV(tauntLV);
-                }
-                else
-                {
-                    skill_Taunt.GetComponent<Taunt>().UpdateLV(tauntLV);
+                    maxLV[1] = knockbackLV;
                 }
                 break;
 
@@ -302,6 +343,30 @@ public class PlayerController : MonoBehaviour
                 {
                     skill_Nautilus.GetComponent<Nautilus>().UpdateLV(nautilusLV);
                 }
+
+                if (nautilusLV > maxLV[2])
+                {
+                    maxLV[2] = nautilusLV;
+                }
+                break;
+
+            case "Taunt":
+                tauntLV++;
+                if (tauntLV == 1)
+                {
+                    ownSkill.Add(type);
+                    skill_Taunt.SetActive(true);
+                    skill_Taunt.GetComponent<Taunt>().UpdateLV(tauntLV);
+                }
+                else
+                {
+                    skill_Taunt.GetComponent<Taunt>().UpdateLV(tauntLV);
+                }
+
+                if (tauntLV > maxLV[3])
+                {
+                    maxLV[3] = tauntLV;
+                }
                 break;
 
             case "Virus":
@@ -316,10 +381,15 @@ public class PlayerController : MonoBehaviour
                 {
                     skill_Virus.GetComponent<PoisonGenerator>().UpdateLV(virusLV);
                 }
+
+                if (virusLV > maxLV[4])
+                {
+                    maxLV[4] = virusLV;
+                }
                 break;
         }
 
-        if(ownSkill.Count <= 3)
+        if(ownSkill.Count <= 3 && !init)
         {
             skillIcon.BGAni(ownSkill.IndexOf(type));
         }
@@ -350,4 +420,58 @@ public class PlayerController : MonoBehaviour
         }
     }
     
+    private void InitPlayer()
+    {
+        if(GameManager.gameManager.current_Hp > 0)
+        {
+            hp = GameManager.gameManager.current_Hp;
+            Level = GameManager.gameManager.current_Level;
+            exp = GameManager.gameManager.current_Exp;
+
+            for(int i = 0; i < GameManager.gameManager.current_BallLV; i++)
+            {
+                GetSkill("Ball", true);
+            }
+            for (int i = 0; i < GameManager.gameManager.current_KnockbackLV; i++)
+            {
+                GetSkill("KnockBack", true);
+            }
+            for (int i = 0; i < GameManager.gameManager.current_TauntLV; i++)
+            {
+                GetSkill("Taunt", true);
+            }
+            for (int i = 0; i < GameManager.gameManager.current_NautilusLV; i++)
+            {
+                GetSkill("Nautilus", true);
+            }
+            for (int i = 0; i < GameManager.gameManager.current_VirusLV; i++)
+            {
+                GetSkill("Virus", true);
+            }
+        }
+        else
+        {
+            InitSkill(charName);
+        }
+    }
+
+    public float GetHp()
+    {
+        return this.hp;
+    }
+
+    private void UpdatePlayerInfo()
+    {
+        if(!GameManager.gameManager.isCutScene)
+        {
+            GameManager.gameManager.current_Hp = hp;
+            GameManager.gameManager.current_Level = Level;
+            GameManager.gameManager.current_Exp = exp;
+            GameManager.gameManager.current_BallLV = ballLV;
+            GameManager.gameManager.current_KnockbackLV = knockbackLV;
+            GameManager.gameManager.current_TauntLV = tauntLV;
+            GameManager.gameManager.current_NautilusLV = nautilusLV;
+            GameManager.gameManager.current_VirusLV = virusLV;
+        }
+    }
 }

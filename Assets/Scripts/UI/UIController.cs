@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UIController : MonoBehaviour
 {
@@ -22,7 +23,7 @@ public class UIController : MonoBehaviour
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
-        playerTotalHp = player.hp;
+        playerTotalHp = player.maxHp;
         expText.text = player.exp.ToString() + "/" + player.expList[player.Level].ToString(); 
         levelText.text = "Lv." + player.Level.ToString();
 
@@ -30,7 +31,7 @@ public class UIController : MonoBehaviour
         //debug
         expBar.fillAmount = 0;
         hpBar.fillAmount = 1;
-        hpText.text = player.hp.ToString();
+        hpText.text = player.GetHp().ToString();
     }
 
     // Update is called once per frame
@@ -38,22 +39,26 @@ public class UIController : MonoBehaviour
     {
         PlayerHpBar();
         PlayerExpBar();
-        if (player.hp <= 0)
+        if (player.GetHp() <= 0)
         {
             GameOverImg.gameObject.SetActive(true);
+        }
+        else
+        {
+            GameOverImg.gameObject.SetActive(false);
         }
         
     }
     public void PlayerHpBar()
     {
 
-        if (player.hp > playerTotalHp)
+        if (player.GetHp() > playerTotalHp)
         {
-            playerTotalHp = player.hp;
+            playerTotalHp = player.GetHp();
 
         }
 
-        playerHp = player.hp;
+        playerHp = player.GetHp();
         hpBar.fillAmount = playerHp / playerTotalHp;
 
 
@@ -78,5 +83,16 @@ public class UIController : MonoBehaviour
     {
         levelText.text = "Lv." + player.Level.ToString();
 
+    }
+
+    public void GotoMain()
+    {
+        GameManager.gameManager.initManager();
+        SceneManager.LoadScene("CharacterSelect");
+    }
+
+    public void OnGimmicClicked(GameObject gimmic)
+    {
+        gimmic.SetActive(true);
     }
 }

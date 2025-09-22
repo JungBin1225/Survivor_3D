@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class DynamicJoystick : Joystick
 {
+    tutorial_1Manager tutoManager;
+    
     public float MoveThreshold { get { return moveThreshold; } set { moveThreshold = Mathf.Abs(value); } }
 
     [SerializeField] private float moveThreshold = 1;
@@ -14,6 +17,12 @@ public class DynamicJoystick : Joystick
         MoveThreshold = moveThreshold;
         base.Start();
         background.gameObject.SetActive(false);
+        if(SceneManager.GetActiveScene().name=="Tutorial_1")
+        {
+            tutoManager = GameObject.Find("TutorialManager").GetComponent<tutorial_1Manager>();
+        }
+        //tutoManager = GameObject.Find("TutorialManager").GetComponent<tutorial_1Manager>();
+
     }
 
     public override void OnPointerDown(PointerEventData eventData)
@@ -27,6 +36,15 @@ public class DynamicJoystick : Joystick
     {
         background.gameObject.SetActive(false);
         base.OnPointerUp(eventData);
+        if(tutoManager!=null)
+        {
+            tutoManager.clickCount++;
+            if(tutoManager.clickCount==2)
+            {
+                tutoManager.flow_2();
+            }
+        }
+
     }
 
     protected override void HandleInput(float magnitude, Vector2 normalised, Vector2 radius, Camera cam)
@@ -38,4 +56,6 @@ public class DynamicJoystick : Joystick
         }
         base.HandleInput(magnitude, normalised, radius, cam);
     }
+
+
 }

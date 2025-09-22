@@ -26,6 +26,8 @@ public class CharacterList : MonoBehaviour
 
     void Start()
     {
+        GameManager.gameManager.isCutScene = false;
+        GameManager.gameManager.initManager();
         audio = this.GetComponent<AudioSource>();
 
         for(int i=0;i<characterList.Count;i++)
@@ -48,6 +50,7 @@ public class CharacterList : MonoBehaviour
         if(characterNameList[0]=="Earth")
         {
             audio.clip = BgmList[0].audio;
+            
         }
         else if(characterNameList[0]=="Fire")
         {
@@ -55,7 +58,8 @@ public class CharacterList : MonoBehaviour
         }
 
         audio.Play();
-        
+
+        GameManager.gameManager.playerCharacterType = characterNameList[0];
         return characterNameList[0];
         //return characterList[0].characterType;
     }
