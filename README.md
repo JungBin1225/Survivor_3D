@@ -11,6 +11,8 @@
     + #### 3D 액션 로그라이크
   + ### 개발에 사용한 엔진 및 언어 
     + <img alt="Unity" src ="https://img.shields.io/badge/Unity-FFFFFF.svg?&style=for-the-badge&logo=Unity&logoColor=black"/> <img alt="C#" src ="https://img.shields.io/badge/C Sharp-99CC00.svg?&style=for-the-badge&logo=sharp&logoColor=white"/>
+  + ### 다운로드 링크
+    + [현재는 플레이스토어에서 검색이 되지 않아 다운로드 링크로 변경되었습니다.](https://drive.google.com/drive/folders/10IPE8PG3TKXiSCV2K_SpYz1_anaQFkWH?usp=sharing)
 + ## **개발 개요**
   + ### 개발 기간
     + #### 2022-01-08 ~ 2022-12-01
